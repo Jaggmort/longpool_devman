@@ -17,7 +17,7 @@ def main():
         encoding='utf-8',
         level=logging.DEBUG
         )
-    url2 = 'https://dvmn.org/api/long_polling/'
+    long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
 
     async def send_message(message):
@@ -29,20 +29,20 @@ def main():
     while True:
         try:
             data = {'timestamp': timestamp}
-            rs = requests.get(url2, headers=headers, data=data)
-            r = rs.json()
-            if r['status'] == 'timeout':
-                timestamp = r['timestamp_to_request']
-            if r['status'] == 'found':
-                timestamp = r['last_attempt_timestamp']
-                if r['new_attempts'][0]['is_negative']:
+            request = requests.get(long_poll_url, headers=headers, data=data)
+            request_json = request.json()
+            if request_json['status'] == 'timeout':
+                timestamp = request_json['timestamp_to_request']
+            if request_json['status'] == 'found':
+                timestamp = request_json['last_attempt_timestamp']
+                if request_json['new_attempts'][0]['is_negative']:
                     reaction = 'К работе притензий нету, стоит приступать ' \
                         'к следующему заданию'
                 else:
                     reaction = 'К сожалению работа требует улучшения'
                 message = f'У вас проверили работу' \
-                    f'\"{r["new_attempts"][0]["lesson_title"]}\" \n\n' \
-                    f'{r["new_attempts"][0]["lesson_url"]} \n\n {reaction}'
+                    f'\"{request_json["new_attempts"][0]["lesson_title"]}\" \n\n' \
+                    f'{request_json["new_attempts"][0]["lesson_url"]} \n\n {reaction}'
                 asyncio.run(send_message(message))
         except requests.exceptions.ReadTimeout:
             logging.error('ReadTimeout')
