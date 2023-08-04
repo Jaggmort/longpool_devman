@@ -4,13 +4,14 @@ import dotenv
 import logging
 import os
 from aiogram import Bot
+from textwrap import dedent
 
 
 def main():
     dotenv.load_dotenv('.env')
     tg_token = os.environ['TELEGRAM_TOKEN']
     dvmn_token = os.environ['DEVMAN_TOKEN']
-    chat_id = int(os.environ['CHAT_ID'])
+    chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
     headers = {'Authorization': dvmn_token}
     logging.basicConfig(
         filename='events.log',
@@ -35,19 +36,27 @@ def main():
                 timestamp = request_json['timestamp_to_request']
             if request_json['status'] == 'found':
                 timestamp = request_json['last_attempt_timestamp']
+                new_attempt = request_json["new_attempts"][0]
                 if request_json['new_attempts'][0]['is_negative']:
                     reaction = 'К работе притензий нету, стоит приступать ' \
                         'к следующему заданию'
                 else:
                     reaction = 'К сожалению работа требует улучшения'
-                message = f'У вас проверили работу' \
-                    f'\"{request_json["new_attempts"][0]["lesson_title"]}\" \n\n' \
-                    f'{request_json["new_attempts"][0]["lesson_url"]} \n\n {reaction}'
+                message = dedent(
+                    f'''\
+                    У вас проверили работу: \"{new_attempt["lesson_title"]}\"
+
+                    {new_attempt["lesson_url"]}
+
+                    {reaction}
+                    '''
+                )
                 asyncio.run(send_message(message))
         except requests.exceptions.ReadTimeout:
             logging.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
             logging.error('ConnectionError')
+            asyncio.sleep(60)
 
 
 if __name__ == '__main__':
