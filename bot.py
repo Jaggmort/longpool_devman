@@ -31,13 +31,13 @@ def main():
         try:
             data = {'timestamp': timestamp}
             response = requests.get(long_poll_url, headers=headers, data=data)
-            request_json = response.json()
-            if request_json['status'] == 'timeout':
-                timestamp = request_json['timestamp_to_request']
-            if request_json['status'] == 'found':
-                timestamp = request_json['last_attempt_timestamp']
-                new_attempt = request_json["new_attempts"][0]
-                if request_json['new_attempts'][0]['is_negative']:
+            revies = response.json()
+            if revies['status'] == 'timeout':
+                timestamp = revies['timestamp_to_request']
+            if revies['status'] == 'found':
+                timestamp = revies['last_attempt_timestamp']
+                new_attempt = revies["new_attempts"][0]
+                if revies['new_attempts'][0]['is_negative']:
                     reaction = 'К работе притензий нету, стоит приступать ' \
                         'к следующему заданию'
                 else:
