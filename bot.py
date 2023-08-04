@@ -13,6 +13,7 @@ def main():
     dvmn_token = os.environ['DEVMAN_TOKEN']
     chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
     headers = {'Authorization': dvmn_token}
+    bot = Bot(token=tg_token)    
     logging.basicConfig(
         filename='events.log',
         encoding='utf-8',
@@ -22,7 +23,6 @@ def main():
     timestamp = ''
 
     async def send_message(message):
-        bot = Bot(token=tg_token)
         await bot.send_message(chat_id, message)
         session = await bot.get_session()
         await session.close()
