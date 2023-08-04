@@ -30,8 +30,8 @@ def main():
     while True:
         try:
             data = {'timestamp': timestamp}
-            request = requests.get(long_poll_url, headers=headers, data=data)
-            request_json = request.json()
+            response = requests.get(long_poll_url, headers=headers, data=data)
+            request_json = response.json()
             if request_json['status'] == 'timeout':
                 timestamp = request_json['timestamp_to_request']
             if request_json['status'] == 'found':
