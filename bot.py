@@ -22,11 +22,6 @@ def main():
     long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
 
-    async def send_message(message):
-        await bot.send_message(chat_id, message)
-        session = await bot.get_session()
-        await session.close()
-
     while True:
         try:
             data = {'timestamp': timestamp}
@@ -51,7 +46,9 @@ def main():
                     {reaction}
                     '''
                 )
-                asyncio.run(send_message(message))
+            await bot.send_message(chat_id, message)
+            session = await bot.get_session()
+            await session.close()                
         except requests.exceptions.ReadTimeout:
             logging.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
