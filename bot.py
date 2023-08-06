@@ -46,9 +46,9 @@ async def main():
                     {reaction}
                     '''
                 )
-            await bot.send_message(chat_id, message)
-            session = await bot.get_session()
-            await session.close()
+                await bot.send_message(chat_id, message)
+                session = await bot.get_session()
+                await session.close()
         except requests.exceptions.ReadTimeout:
             logging.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
