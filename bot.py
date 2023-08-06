@@ -15,9 +15,7 @@ async def main():
     headers = {'Authorization': dvmn_token}
     bot = Bot(token=tg_token)
     logging.basicConfig(
-        filename='events.log',
-        encoding='utf-8',
-        level=logging.DEBUG
+        level=logging.ERROR
         )
     long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
