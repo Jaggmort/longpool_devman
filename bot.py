@@ -7,13 +7,13 @@ from aiogram import Bot
 from textwrap import dedent
 
 
-def main():
+async def main():
     dotenv.load_dotenv('.env')
     tg_token = os.environ['TELEGRAM_TOKEN']
     dvmn_token = os.environ['DEVMAN_TOKEN']
     chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
     headers = {'Authorization': dvmn_token}
-    bot = Bot(token=tg_token)    
+    bot = Bot(token=tg_token)
     logging.basicConfig(
         filename='events.log',
         encoding='utf-8',
@@ -48,7 +48,7 @@ def main():
                 )
             await bot.send_message(chat_id, message)
             session = await bot.get_session()
-            await session.close()                
+            await session.close()
         except requests.exceptions.ReadTimeout:
             logging.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
@@ -57,4 +57,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
