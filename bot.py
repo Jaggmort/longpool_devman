@@ -72,5 +72,6 @@ if __name__ == '__main__':
     logger = logging.getLogger('Pool logger')
     logger.setLevel('INFO')
     logger.addHandler(PoolLogsHandler(bot, chat_id))
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    if os.name == 'nt':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     main()
