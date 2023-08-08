@@ -7,19 +7,22 @@ from aiogram import Bot
 from textwrap import dedent
 
 
-async def main():
-    dotenv.load_dotenv('.env')
-    tg_token = os.environ['TELEGRAM_TOKEN']
-    dvmn_token = os.environ['DEVMAN_TOKEN']
-    chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
+class PoolLogsHandler(logging.Handler):
+    def __init__(self, bot, chat_id):
+        super().__init__()
+        self.bot = bot
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        message = self.format(record)
+        asyncio.run(send_message(message))
+
+
+def main():
     headers = {'Authorization': dvmn_token}
-    bot = Bot(token=tg_token)
-    logging.basicConfig(
-        level=logging.ERROR
-        )
     long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
-
+    logger.info('long_pool start')
     while True:
         try:
             data = {'timestamp': timestamp}
@@ -44,15 +47,30 @@ async def main():
                     {reaction}
                     '''
                 )
-                await bot.send_message(chat_id, message)
-                session = await bot.get_session()
-                await session.close()
+                asyncio.run(send_message(message))
         except requests.exceptions.ReadTimeout:
-            logging.error('ReadTimeout')
+            logger.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
-            logging.error('ConnectionError')
+            logger.error('ConnectionError')
             asyncio.sleep(60)
 
 
+async def send_message(message):
+    await bot.send_message(chat_id, message)
+    session = await bot.get_session()
+    await session.close()
+
 if __name__ == '__main__':
-    asyncio.run(main())
+    dotenv.load_dotenv('.env')
+    tg_token = os.environ['TELEGRAM_TOKEN']
+    dvmn_token = os.environ['DEVMAN_TOKEN']
+    chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
+    bot = Bot(token=tg_token)
+    logging.basicConfig(
+        level=logging.ERROR
+        )
+    logger = logging.getLogger('Pool logger')
+    logger.setLevel('INFO')
+    logger.addHandler(PoolLogsHandler(bot, chat_id))
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    main()
