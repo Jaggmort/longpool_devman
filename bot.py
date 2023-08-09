@@ -15,10 +15,21 @@ class PoolLogsHandler(logging.Handler):
 
     def emit(self, record):
         message = self.format(record)
-        asyncio.run(send_message(message))
+        asyncio.run(send_message(message, self.bot, self.chat_id))
 
 
 def main():
+    dotenv.load_dotenv('.env')
+    tg_token = os.environ['TELEGRAM_TOKEN']
+    dvmn_token = os.environ['DEVMAN_TOKEN']
+    chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
+    bot = Bot(token=tg_token)
+    logging.basicConfig(
+        level=logging.ERROR
+        )
+    logger = logging.getLogger('Pool logger')
+    logger.setLevel('INFO')
+    logger.addHandler(PoolLogsHandler(bot, chat_id))    
     headers = {'Authorization': dvmn_token}
     long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
@@ -47,7 +58,7 @@ def main():
                     {reaction}
                     '''
                 )
-                asyncio.run(send_message(message))
+                asyncio.run(send_message(message, bot, chat_id))
         except requests.exceptions.ReadTimeout:
             logger.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
@@ -55,23 +66,13 @@ def main():
             asyncio.sleep(60)
 
 
-async def send_message(message):
+async def send_message(message, bot, chat_id):
     await bot.send_message(chat_id, message)
     session = await bot.get_session()
     await session.close()
 
+
 if __name__ == '__main__':
-    dotenv.load_dotenv('.env')
-    tg_token = os.environ['TELEGRAM_TOKEN']
-    dvmn_token = os.environ['DEVMAN_TOKEN']
-    chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
-    bot = Bot(token=tg_token)
-    logging.basicConfig(
-        level=logging.ERROR
-        )
-    logger = logging.getLogger('Pool logger')
-    logger.setLevel('INFO')
-    logger.addHandler(PoolLogsHandler(bot, chat_id))
     if os.name == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     main()
