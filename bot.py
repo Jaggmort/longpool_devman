@@ -7,18 +7,19 @@ from aiogram import Bot
 from textwrap import dedent
 
 
-class PoolLogsHandler(logging.Handler):
-    def __init__(self, bot, chat_id):
-        super().__init__()
-        self.bot = bot
-        self.chat_id = chat_id
-
-    def emit(self, record):
-        message = self.format(record)
-        asyncio.run(send_message(message, self.bot, self.chat_id))
-
-
 def main():
+
+    class PoolLogsHandler(logging.Handler):
+
+        def __init__(self, bot, chat_id):
+            super().__init__()
+            self.bot = bot
+            self.chat_id = chat_id
+
+        def emit(self, record):
+            message = self.format(record)
+            asyncio.run(send_message(message, self.bot, self.chat_id))
+
     dotenv.load_dotenv('.env')
     tg_token = os.environ['TELEGRAM_TOKEN']
     dvmn_token = os.environ['DEVMAN_TOKEN']
@@ -27,7 +28,7 @@ def main():
     logging.basicConfig(
         level=logging.ERROR
         )
-    logger = logging.getLogger('Pool logger')
+    logger = logging.getLogger('pool')
     logger.setLevel('INFO')
     logger.addHandler(PoolLogsHandler(bot, chat_id))    
     headers = {'Authorization': dvmn_token}
@@ -45,10 +46,10 @@ def main():
                 timestamp = revies['last_attempt_timestamp']
                 new_attempt = revies["new_attempts"][0]
                 if revies['new_attempts'][0]['is_negative']:
+                    reaction = 'К сожалению работа требует улучшения'
+                else:
                     reaction = 'К работе притензий нету, стоит приступать ' \
                         'к следующему заданию'
-                else:
-                    reaction = 'К сожалению работа требует улучшения'
                 message = dedent(
                     f'''\
                     У вас проверили работу: \"{new_attempt["lesson_title"]}\"
