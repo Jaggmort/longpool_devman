@@ -9,6 +9,9 @@ from textwrap import dedent
 
 def main():
 
+    if os.name == 'nt':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     class PoolLogsHandler(logging.Handler):
 
         def __init__(self, bot, chat_id):
@@ -30,7 +33,7 @@ def main():
         )
     logger = logging.getLogger('pool')
     logger.setLevel('INFO')
-    logger.addHandler(PoolLogsHandler(bot, chat_id))    
+    logger.addHandler(PoolLogsHandler(bot, chat_id))
     headers = {'Authorization': dvmn_token}
     long_poll_url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
@@ -74,6 +77,4 @@ async def send_message(message, bot, chat_id):
 
 
 if __name__ == '__main__':
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     main()
