@@ -7,31 +7,31 @@ from aiogram import Bot
 from textwrap import dedent
 
 
+logger = logging.getLogger('pool')
+
+
+class PoolLogsHandler(logging.Handler):
+
+    def __init__(self, bot, chat_id):
+        super().__init__()
+        self.bot = bot
+        self.chat_id = chat_id
+
+    def emit(self, record):
+        message = self.format(record)
+        asyncio.run(self.bot.send_message(self.chat_id, message))
+
+
 def main():
 
     if os.name == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    class PoolLogsHandler(logging.Handler):
-
-        def __init__(self, bot, chat_id):
-            super().__init__()
-            self.bot = bot
-            self.chat_id = chat_id
-
-        def emit(self, record):
-            message = self.format(record)
-            asyncio.run(bot.send_message(chat_id, message))
 
     dotenv.load_dotenv('.env')
     tg_token = os.environ['TELEGRAM_TOKEN']
     dvmn_token = os.environ['DEVMAN_TOKEN']
     chat_id = int(os.environ['TELEGRAM_CHAT_ID'])
     bot = Bot(token=tg_token)
-    logging.basicConfig(
-        level=logging.ERROR
-        )
-    logger = logging.getLogger('pool')
     logger.setLevel('INFO')
     logger.addHandler(PoolLogsHandler(bot, chat_id))
     headers = {'Authorization': dvmn_token}
