@@ -21,7 +21,7 @@ def main():
 
         def emit(self, record):
             message = self.format(record)
-            asyncio.run(send_message(message, self.bot, self.chat_id))
+            asyncio.run(bot.send_message(chat_id, message))
 
     dotenv.load_dotenv('.env')
     tg_token = os.environ['TELEGRAM_TOKEN']
@@ -62,18 +62,12 @@ def main():
                     {reaction}
                     '''
                 )
-                asyncio.run(send_message(message, bot, chat_id))
+                asyncio.run(bot.send_message(chat_id, message))
         except requests.exceptions.ReadTimeout:
             logger.error('ReadTimeout')
         except requests.exceptions.ConnectionError:
             logger.error('ConnectionError')
             asyncio.sleep(60)
-
-
-async def send_message(message, bot, chat_id):
-    await bot.send_message(chat_id, message)
-    session = await bot.get_session()
-    await session.close()
 
 
 if __name__ == '__main__':
